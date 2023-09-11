@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This template creates an EC2 instance w/ a SG which enables SSH.
+Resources:
+  CFNInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-051f7e7f6c2f40dc1
+      InstanceType: t2.micro
+      KeyName: morgoliath-clarusway # Use your owm keypair name w/o .pem
+      SecurityGroups: 
+        - !Ref CFNSecGroup
+      Tags: 
+        - Key: Name
+          Value: CFN-Instance
+
+  CFNSecGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows SSH # Required
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
