@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This my Cfn template for EC2 with Security Group 
+
+Resources:
+
+  MyWebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-01c647eace872fc02
+      InstanceType: t2.micro
+      KeyName: ottoaws9
+      SecurityGroupIds: 
+        - !Ref MySecGrp
+      Tags: 
+        - Key: Name
+          Value: !Sub Osvaldo ${AWS::StackName}
+      UserData:
+        Fn::Base64: |
+            #! /bin/bash
+            yum update -y
+            yum install httpd -y
+            FOLDER="https://raw.githubusercontent.com/awsdevopsteam/101-kittens-carousel-static-website/master/static-web"
+            cd /var/www/html
+            wget ${FOLDER}/index.html
+            wget ${FOLDER}/cat0.jpg
+            wget ${FOLDER}/cat1.jpg
+            wget ${FOLDER}/cat2.jpg
+            wget ${FOLDER}/cat3.png
+            systemctl start httpd
+            systemctl enable httpd
+     
+  MySecGrp:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ssh and http # Required
+      GroupName: osvaldosecportfolio
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: env
+          Value: dev
+        
+Outputs:
+  WebSiteURL:
+    Description: This output gives the URL of EC2
+    Value: !Sub 
+      - http://${PublicAddress}
+      - PublicAddress: !GetAtt MyWebServer.PublicDnsName
